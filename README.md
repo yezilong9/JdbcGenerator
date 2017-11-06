@@ -1,8 +1,10 @@
 ## 快速开始
 
-克隆项目文件:
+克隆项目文件并安装:
 ```
 git clone https://github.com/yezilong9/JdbcGenerator.git
+cd JdbcGenerator
+mvn clean install
 ```
 进入项目目录执行插件:
 ```
