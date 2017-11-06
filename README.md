@@ -16,8 +16,8 @@ mvn com.ubbcc.plugin:jdbc-generator:JPA -DdbUrl=jdbc:mysql://localhost:3306/Test
 
 
 ## 生成的代码支持哪些风格？
-1.Spring data JPA
-2.Mybatis(暂无)
+##### 1.Spring data JPA
+##### 2.Mybatis(暂无)
 
 ## 参数列表
 
