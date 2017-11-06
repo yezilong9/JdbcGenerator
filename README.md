@@ -1,4 +1,4 @@
-##快速开始
+## 快速开始
 
 克隆项目文件:
 ```
@@ -15,11 +15,12 @@ mvn com.ubbcc.plugin:jdbc-generator:JPA -DdbUrl=jdbc:mysql://localhost:3306/Test
 一个简单的代码生成器maven插件，好处是不需要依赖项目就能使用，用于自动生成数据库对应表的所有操作，后续会添加controller以及页面等。
 
 
-##生成的代码支持哪些风格？
+## 生成的代码支持哪些风格？
 1.Spring data JPA
 2.Mybatis(暂无)
 
-##参数列表
+## 参数列表
+
 | 参数        | 说明|
 | ------------- |:-------------:|
 | dbUrl     | 数据库url |
