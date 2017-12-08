@@ -1,7 +1,8 @@
 package com.ubbcc.plugin;
 
 import com.ubbcc.plugin.enums.ColumnType;
-import com.ubbcc.plugin.enums.GeneratorStyle;
+import com.ubbcc.plugin.utils.NameUtil;
+import com.ubbcc.plugin.utils.NameUtil.NameStyle;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -80,18 +81,6 @@ public abstract class JdbcGenerator extends AbstractMojo {
   public abstract void execute() throws MojoExecutionException, MojoFailureException;
 
 
-  public static void main(String[] args)
-      throws IOException, SQLException, ClassNotFoundException, TemplateException {
-//    Properties properties = new Properties();
-//    properties.load(JdbcGenerator.class.getResourceAsStream("/jdbc-generator.properties"));
-//    Config config = new Config(properties);
-    JdbcGenerator generator = new JpaGenerator(
-        "jdbc:mysql://localhost:3306/TestDb?autoReconnect=true", "root", "1234",
-        "com.ubbcc.module", true, null);
-    generator.generator();
-  }
-
-
   public void generator()
       throws SQLException, IOException, ClassNotFoundException, TemplateException {
     Connection connection = getConnection();
@@ -113,7 +102,6 @@ public abstract class JdbcGenerator extends AbstractMojo {
         String columnName = colRet.getString("COLUMN_NAME");
         String annotation = "@Column";
         if (columnName.equals("id") || columnName.equals("ctime") || columnName.equals("utime")) {
-//          annotation = "@Id";
           continue;
         }
         String columnType = colRet.getString("TYPE_NAME");
@@ -121,20 +109,20 @@ public abstract class JdbcGenerator extends AbstractMojo {
         HashMap<String, Object> columnMap = new HashMap<String, Object>();
         columnMap.put("annotation", annotation);
         columnMap.put("columnType", ColumnType.getType(columnType));
-        columnMap.put("columnName", conver1(columnName));
-        columnMap.put("methodName", conver(columnName));
+        columnMap.put("columnName", NameUtil.conver(columnName, NameStyle.COLUMN));
+        columnMap.put("methodName", NameUtil.conver(columnName, NameStyle.ENTITY));
         list.add(columnMap);
       }
       hashMap.put("parameters", list);
       hashMap.put("tableName", tableName);
-      String entityName = conver(tableName);
+      String entityName = NameUtil.conver(tableName, NameStyle.ENTITY);
       hashMap.put("entityName", entityName);
       hashMap.put("package", path);
 
       if (!hasBase) {
         String[] fileNames = {"BaseEntity","BaseRepository","BaseService","BaseServiceImpl"};
         for(String fileName : fileNames){
-          mkdir(hashMap,fileName);
+          mkdirBase(hashMap,fileName);
         }
         hasBase = true;
       }
@@ -147,10 +135,8 @@ public abstract class JdbcGenerator extends AbstractMojo {
   }
 
 
-  private void mkdir(HashMap<String, Object> hashMap, String fileName)
+  private void mkdirBase(HashMap<String, Object> hashMap, String fileName)
       throws IOException, TemplateException {
-//    File f = new File(JdbcGenerator.class.getResource("/JPA/" + fileName + ".ftl").getFile());
-//    String content = FileUtils.readFileToString(f, "UTF-8");
     String content = IOUtils.toString(JdbcGenerator.class.getResourceAsStream("/JPA/" + fileName + ".ftl"),"UTF-8");
     String javaFile = generateTemplate(content, hashMap);
     String codePath =
@@ -166,8 +152,6 @@ public abstract class JdbcGenerator extends AbstractMojo {
 
   private void mkdirEntity(HashMap<String, Object> hashMap, String entityName)
       throws IOException, TemplateException {
-//    File f = new File(JdbcGenerator.class.getResourceAsStream("/JPA/entity.ftl").getFile());
-//    String content = FileUtils.readFileToString(f, "UTF-8");
     String content = IOUtils.toString(JdbcGenerator.class.getResourceAsStream("/JPA/entity.ftl"),"UTF-8");
     String javaFile = generateTemplate(content, hashMap);
     String codePath =
@@ -183,8 +167,6 @@ public abstract class JdbcGenerator extends AbstractMojo {
 
   private void mkdirService(HashMap<String, Object> hashMap, String entityName)
       throws IOException, TemplateException {
-//    File f = new File(JdbcGenerator.class.getResource("/JPA/service.ftl").getFile());
-//    String content = FileUtils.readFileToString(f, "UTF-8");
     String content = IOUtils.toString(JdbcGenerator.class.getResourceAsStream("/JPA/service.ftl"),"UTF-8");
     String javaFile = generateTemplate(content, hashMap);
     String codePath =
@@ -256,56 +238,5 @@ public abstract class JdbcGenerator extends AbstractMojo {
     StringWriter writer = new StringWriter();
     template.process(map, writer);
     return writer.toString();
-  }
-
-  public static String conver(String src) {
-    if (src == null) {
-      return null;
-    }
-
-    StringBuilder sb = new StringBuilder();
-    boolean is = false;
-    for (int i = 0; i < src.length(); i++) {
-      char c = src.charAt(i);
-      if (i == 0) {
-        c = Character.toUpperCase(c);
-      }
-      if (c == '_') {
-        is = true;
-      } else {
-        if (is) {
-          sb.append(Character.toUpperCase(c));
-          is = false;
-        } else {
-          sb.append(c);
-        }
-      }
-    }
-    String ret = sb.toString();
-    return ret.startsWith("_") ? ret.substring(1) : ret;
-  }
-
-  public static String conver1(String src) {
-    if (src == null) {
-      return null;
-    }
-
-    StringBuilder sb = new StringBuilder();
-    boolean is = false;
-    for (int i = 0; i < src.length(); i++) {
-      char c = src.charAt(i);
-      if (c == '_') {
-        is = true;
-      } else {
-        if (is) {
-          sb.append(Character.toUpperCase(c));
-          is = false;
-        } else {
-          sb.append(c);
-        }
-      }
-    }
-    String ret = sb.toString();
-    return ret.startsWith("_") ? ret.substring(1) : ret;
   }
 }
